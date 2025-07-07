@@ -1,0 +1,175 @@
+{
+	"info": {
+		"program": "licensecheck",
+		"version": "2025.1.0",
+		"license": "MIT LICENSE"
+	},
+	"project_license": "APACHE LICENSE",
+	"packages": [
+		{
+			"name": "ATOMICFILE",
+			"version": "1.0.1",
+			"size": -1,
+			"homePage": "http://github.com/sashka/atomicfile-py",
+			"author": "Alexander Saltanov",
+			"license": "MIT",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "ATOMICFILE-1.0.1"
+		},
+		{
+			"name": "BOTO3",
+			"version": "1.38.36",
+			"size": -1,
+			"homePage": "https://github.com/boto/boto3",
+			"author": "Amazon Web Services",
+			"license": "APACHE SOFTWARE LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "BOTO3-1.38.36"
+		},
+		{
+			"name": "BOTOCORE",
+			"version": "1.38.36",
+			"size": -1,
+			"homePage": "https://github.com/boto/botocore",
+			"author": "Amazon Web Services",
+			"license": "APACHE SOFTWARE LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "BOTOCORE-1.38.36"
+		},
+		{
+			"name": "CLICK",
+			"version": "8.2.1",
+			"size": -1,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "BSD-3-CLAUSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "CLICK-8.2.1"
+		},
+		{
+			"name": "COLORAMA",
+			"version": "0.4.6",
+			"size": -1,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "BSD LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "COLORAMA-0.4.6"
+		},
+		{
+			"name": "JMESPATH",
+			"version": "1.0.1",
+			"size": -1,
+			"homePage": "https://github.com/jmespath/jmespath.py",
+			"author": "James Saryerwinnie",
+			"license": "MIT LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "JMESPATH-1.0.1"
+		},
+		{
+			"name": "PACKAGING",
+			"version": "25.0",
+			"size": 236486,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "APACHE SOFTWARE LICENSE;; BSD LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "PACKAGING-25.0"
+		},
+		{
+			"name": "PYTEST",
+			"version": "8.4.0",
+			"size": -1,
+			"homePage": "UNKNOWN",
+			"author": "Holger Krekel, Bruno Oliveira, Ronny Pfannschmidt, Floris Bruynooghe, Brianna Laugher, Florian Bruhin, Others (See AUTHORS)",
+			"license": "MIT LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "PYTEST-8.4.0"
+		},
+		{
+			"name": "PYTEST-MOCK",
+			"version": "3.14.1",
+			"size": -1,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "MIT LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "PYTEST-MOCK-3.14.1"
+		},
+		{
+			"name": "PYTHON-DATEUTIL",
+			"version": "2.9.0.post0",
+			"size": -1,
+			"homePage": "https://github.com/dateutil/dateutil",
+			"author": "Gustavo Niemeyer",
+			"license": "APACHE SOFTWARE LICENSE;; BSD LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "PYTHON-DATEUTIL-2.9.0.post0"
+		},
+		{
+			"name": "PYYAML",
+			"version": "6.0.2",
+			"size": -1,
+			"homePage": "https://pyyaml.org/",
+			"author": "Kirill Simonov",
+			"license": "MIT LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "PYYAML-6.0.2"
+		},
+		{
+			"name": "S3TRANSFER",
+			"version": "0.13.0",
+			"size": -1,
+			"homePage": "https://github.com/boto/s3transfer",
+			"author": "Amazon Web Services",
+			"license": "APACHE SOFTWARE LICENSE",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "S3TRANSFER-0.13.0"
+		},
+		{
+			"name": "SETUPTOOLS",
+			"version": "80.9.0",
+			"size": -1,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "MIT",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "SETUPTOOLS-80.9.0"
+		},
+		{
+			"name": "TYPING-EXTENSIONS",
+			"version": "4.14.0",
+			"size": -1,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "PSF-2.0",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "TYPING-EXTENSIONS-4.14.0"
+		},
+		{
+			"name": "URLLIB3",
+			"version": "2.4.0",
+			"size": 415583,
+			"homePage": "UNKNOWN",
+			"author": "UNKNOWN",
+			"license": "MIT",
+			"licenseCompat": true,
+			"errorCode": 0,
+			"namever": "URLLIB3-2.4.0"
+		}
+	]
+}
