@@ -1,4 +1,5 @@
 import os
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -7,9 +8,7 @@ from atomicfile import AtomicFile
 
 from dataall_cli.utils import load_config, save_config
 
-PROFILE_CONFIG = os.path.join(
-    Path(__file__).parents[1], "profile_config", "config.yaml"
-)
+PROFILE_CONFIG = os.path.join(os.path.join(tempfile.mkdtemp(), "config.yaml"))
 os.environ["dataall_config_path"] = PROFILE_CONFIG
 
 
