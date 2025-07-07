@@ -1,7 +1,7 @@
 import itertools
 import json
 import os
-from pathlib import Path
+import tempfile
 
 import pytest
 import yaml
@@ -9,9 +9,7 @@ from atomicfile import AtomicFile
 from click.testing import CliRunner
 from dataall_core.profile import Profile, get_profile
 
-PROFILE_CONFIG = os.path.join(
-    Path(__file__).parents[1], "profile_config", "config.yaml"
-)
+PROFILE_CONFIG = os.path.join(os.path.join(tempfile.mkdtemp(), "config.yaml"))
 os.environ["dataall_config_path"] = PROFILE_CONFIG
 
 from dataall_cli.cli import commands, configure, dataall_cli  # noqa: E402
