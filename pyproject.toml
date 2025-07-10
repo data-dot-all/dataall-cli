@@ -1,6 +1,6 @@
 [project]
 name = "dataall-cli"
-version = "0.4.1"
+version = "0.4.2"
 description = "AWS data.all CLI"
 authors = [{ name = "Amazon Web Services" }]
 license = { text = "Apache License 2.0" }
@@ -22,7 +22,7 @@ dependencies = [
     "atomicfile>=1.0.1",
     "PyYAML>=6.0.1",
     "setuptools; python_version >= '3.12'",
-    "dataall-core==0.4.1",
+    "dataall-core>=0.4.2",
 ]
 
 [project.scripts]

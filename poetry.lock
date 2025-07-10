@@ -1212,14 +1212,14 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "dataall-core"
-version = "0.4.1"
+version = "0.4.2"
 description = "AWS data.all core"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "dataall_core-0.4.1-py3-none-any.whl", hash = "sha256:a7583dc903efeceabc7c95618ee30df42d0ce7cf6621c41f3eefc05fa400f3c1"},
-    {file = "dataall_core-0.4.1.tar.gz", hash = "sha256:2ea34d349e580afdf10a33b9bd5083e4fb6cfb3ec257b6863809706585f5040b"},
+    {file = "dataall_core-0.4.2-py3-none-any.whl", hash = "sha256:33a0d9267ae58afee56a396d8c23df2777df656abcf21ea286c417674723cb54"},
+    {file = "dataall_core-0.4.2.tar.gz", hash = "sha256:e209be48d4f858dd575562aacf2a1345a65ce1badd3e80c9f2a46b345acbf693"},
 ]
 
 [package.dependencies]
@@ -4510,4 +4510,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "15abd3baa24a87598da9b5faafdcc21942f5b7bf3d0fad3db39c763c7d00a712"
+content-hash = "c0b2f9fd24bb539ae493aade60b27b80643a79a80348562d35b1bc5cd2533201"
