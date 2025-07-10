@@ -9,8 +9,8 @@ import click
 from dataall_core.dataall_client import DataallClient
 from dataall_core.profile import CONFIG_PATH
 
-from .bind_commands import bind
-from .utils import save_config
+from dataall_cli.bind_commands import bind
+from dataall_cli.utils import save_config
 
 DA_CONFIG_PATH = os.getenv("dataall_config_path", CONFIG_PATH)
 CREDS_PATH = os.getenv("dataall_creds_path", None)
@@ -36,7 +36,7 @@ commands = da.op_dict
 @click.group(name="dataall_cli", invoke_without_command=True)
 def dataall_cli() -> None:
     """data.all cli groups."""
-    click.echo("Executing dataall_cli.")
+    click.echo("Executing dataall_cli.", err=True)
     pass
 
 
@@ -112,7 +112,7 @@ def configure(
     profile: str,
 ) -> None:
     """Configure data.all client for a given user, use profile to setup multiple user profiles."""
-    click.echo("Configuring data.all CLI...")
+    click.echo("Configuring data.all CLI...", err=True)
 
     try:
         profile_params_dict = {
@@ -143,6 +143,6 @@ def configure(
             params_dict=profile_params_dict,
             config_path=Path(DA_CONFIG_PATH),
         )
-        click.echo("data.all CLI configured successfully.")
+        click.echo("data.all CLI configured successfully.", err=True)
     except Exception as e:
-        click.echo(f"An error occurred: {e}")
+        click.echo(f"An error occurred: {e}", err=True)

@@ -16,21 +16,11 @@ import sys
 
 from dataall_core.profile import CONFIG_PATH
 
-from .__metadata__ import (  # noqa: F401
-    __description__,
-    __license__,
-    __title__,
-    __version__,
+logging.basicConfig(
+    stream=sys.stderr,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=os.environ.get("dataall_cli_loglevel", "INFO").upper(),
 )
-
-root_logger = logging.getLogger("dataall_cli")
-root_logger.setLevel(os.environ.get("dataall_cli_loglevel", "INFO").upper())
-
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-)
-root_logger.addHandler(handler)
 
 DA_CONFIG_PATH = os.getenv("dataall_config_path", CONFIG_PATH)
 CREDS_PATH = os.getenv("dataall_creds_path", None)
