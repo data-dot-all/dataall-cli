@@ -19,7 +19,7 @@ import sphinx_bootstrap_theme
 
 # Insert dataall CLI's path into the system.
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
-import dataall_cli  # noqa: E402
+import dataall_cli
 
 # Append local Sphinx extensions
 sys.path.append(os.path.abspath("./_ext"))

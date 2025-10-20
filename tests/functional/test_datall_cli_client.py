@@ -135,9 +135,9 @@ def test_cli_commands_custom_header_invalid(
     )
 
     # Set env variable to use custom header
-    os.environ[
-        "dataall_custom_headers_json"
-    ] = '{ "X-Custom-Header": "test", "X-Custom-Header-2": 25 '
+    os.environ["dataall_custom_headers_json"] = (
+        '{ "X-Custom-Header": "test", "X-Custom-Header-2": 25 '
+    )
 
     for operation_name, op_details in dict(
         itertools.islice(commands.items(), N)
