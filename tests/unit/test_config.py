@@ -97,3 +97,21 @@ def test_load_config_dne():
 def test_load_config_bad_path():
     with pytest.raises(Exception):
         load_config(Path(__file__))
+
+
+def test_save_config_oidc_browser(base_profile_params):
+    auth_type = "OidcBrowserAuth"
+    profile = "default"
+    base_profile_params["auth_type"] = auth_type
+    base_profile_params["redirect_uri"] = "http://localhost:8765/callback"
+    base_profile_params["scopes"] = "openid offline_access"
+
+    save_config(
+        profile=profile,
+        auth_type=auth_type,
+        params_dict=base_profile_params,
+        config_path=PROFILE_CONFIG,
+    )
+
+    config = load_config(PROFILE_CONFIG)
+    assert config[profile]["scopes"] == "openid offline_access"
