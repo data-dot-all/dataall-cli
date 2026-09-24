@@ -65,6 +65,9 @@ ISSUER_PROMPT = (
 )
 SECRET_PROMPT = "Enter IdP client secret (if applicable)"
 AUTH_SERVER_PROMPT = "Enter IdP custom auth server (if applicable)"
+FRONT_PAGE_PROMPT = (
+    "Enter data.all front page URL (leave empty to type the values yourself)"
+)
 
 
 class AuthScopedOption(click.Option):
@@ -134,9 +137,10 @@ def _for(auth_types: List[str], **spec: Any) -> Dict[str, Dict[str, Any]]:
 )
 @click.option(
     "--dataall_url",
-    default=None,
+    cls=AuthScopedOption,
     expose_value=False,
     callback=_discover,
+    scoped={"OidcBrowserAuth": {"prompt": FRONT_PAGE_PROMPT, "default": ""}},
     help="data.all front page URL; reads the IdP issuer, client id and API endpoint from it",
 )
 @click.option(

@@ -74,7 +74,7 @@ def test_cli_help_option(runner):
             ),
             (
                 "TestOidcProfile",
-                "OidcBrowserAuth\ntestclient\ntestAPIURL\ntestIdPURL\n\nTestOidcProfile\n",
+                "OidcBrowserAuth\n\ntestclient\ntestAPIURL\ntestIdPURL\n\nTestOidcProfile\n",
             ),
         ]
     ),
@@ -92,7 +92,7 @@ def test_cli_configure_option(runner, profile_input, mocked_get_jwt_token):
 def test_cli_configure_oidc_browser_defaults(runner, mocked_get_jwt_token):
     result = runner.invoke(
         configure,
-        input="OidcBrowserAuth\ntestclient\ntestAPIURL\nhttps://idp/oauth2/aus1\n\nTestOidcDefaults\n",
+        input="OidcBrowserAuth\n\ntestclient\ntestAPIURL\nhttps://idp/oauth2/aus1\n\nTestOidcDefaults\n",
     )
     assert result.exit_code == 0
 
@@ -130,6 +130,27 @@ def test_cli_configure_from_dataall_url(runner, mocked_get_jwt_token, mocker):
     assert profile.api_endpoint_url == "https://api/prod"
     assert profile.idp_domain_url == "https://idp/oauth2/aus1"
     assert profile.redirect_uri == "http://localhost:8765/callback"
+    assert profile.frontend_url == "https://dataall.example.com"
+
+
+def test_cli_configure_prompts_for_front_page(runner, mocked_get_jwt_token, mocker):
+    mocker.patch(
+        "dataall_cli.cli.discover_from_frontend",
+        return_value={
+            "idp_domain_url": "https://idp/oauth2/aus1",
+            "client_id": "0oaCLIENT",
+            "api_endpoint_url": "https://api/prod",
+        },
+    )
+    result = runner.invoke(
+        configure, input="OidcBrowserAuth\nhttps://dataall.example.com\nTestPrompted\n"
+    )
+    assert result.exit_code == 0
+    assert "Enter data.all app client id" not in result.output
+    assert "Discovered client_id: 0oaCLIENT" in result.output
+
+    profile = get_profile(profile="TestPrompted", config_path=PROFILE_CONFIG)
+    assert profile.client_id == "0oaCLIENT"
     assert profile.frontend_url == "https://dataall.example.com"
 
 

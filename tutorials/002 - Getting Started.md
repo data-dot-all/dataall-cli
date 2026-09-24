@@ -69,6 +69,8 @@ The quickest way to configure it is to point the CLI at the data.all front page;
 dataall_cli configure --profile okta --auth_type OidcBrowserAuth --dataall_url https://DATAALL_DOMAIN_URL
 ```
 
+Without flags, `dataall_cli configure` asks for the authentication type and then for the front page URL; leave it empty to type the issuer, client id and API endpoint yourself.
+
 The resulting profile in `~/.dataall/config.yaml`:
 
 ```
