@@ -146,7 +146,7 @@ def test_cli_configure_from_dataall_url(runner, mocked_get_jwt_token, mocker):
 
 
 def test_cli_configure_prompts_for_front_page(runner, mocked_get_jwt_token, mocker):
-    mocker.patch(
+    discover = mocker.patch(
         "dataall_cli.cli.discover_from_frontend",
         return_value=OIDC_DISCOVERY,
     )
@@ -154,6 +154,8 @@ def test_cli_configure_prompts_for_front_page(runner, mocked_get_jwt_token, mock
         configure, input="https://dataall.example.com\nTestPrompted\n"
     )
     assert result.exit_code == 0
+    discover.assert_called_once()
+    assert result.output.count("Discovered client_id") == 1
     assert "Select authentication type" not in result.output
     assert "Enter data.all app client id" not in result.output
     assert "Discovered client_id: 0oaCLIENT" in result.output
