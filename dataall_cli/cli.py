@@ -56,6 +56,7 @@ DEFAULT_REDIRECT_URI = "http://localhost:8765/callback"
 DEFAULT_FALLBACK_REDIRECT_URI = "http://localhost:8766/callback"
 DEFAULT_SCOPES = "openid offline_access"
 DISCOVERED = "dataall_discovered"
+DISCOVERED_FOR = "dataall_discovered_for"
 
 DOMAIN_PROMPT = "Enter data.all's domain URL (e.g. https://<DOMAIN>.com)"
 IDP_PROMPT = "Enter data.all Identity Provider Domain (e.g. https://<IdP-DOMAIN>.com)"
@@ -109,8 +110,9 @@ class AuthScopedOption(click.Option):
 def _discover(
     ctx: click.Context, _param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
-    if not value:
+    if not value or ctx.meta.get(DISCOVERED_FOR) == value:
         return value
+    ctx.meta[DISCOVERED_FOR] = value
     try:
         found = discover_from_frontend(value)
     except Exception as e:
