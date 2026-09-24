@@ -2,10 +2,12 @@
 
 import json
 import logging
+from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 import click
 from dataall_core.dataall_client import DataallClient
+from dataall_core.profile import get_profile
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +47,15 @@ def _bind_function(
 
     def func(**kwargs: Any) -> None:
         logger.debug("I am the '{}' command".format(name))
+        profile = kwargs.get("profile", "default")
+        if get_profile(profile=profile, config_path=Path(config_path)) is None:
+            raise click.ClickException(
+                f"Profile '{profile}' is not configured; run: dataall_cli configure --profile {profile}"
+            )
         da_client = DataallClient(
             schema_path=schema_path, schema_version=schema_version
         ).client(
-            profile=kwargs.get("profile", "default"),
+            profile=profile,
             config_path=config_path,
             custom_headers=custom_headers,
         )

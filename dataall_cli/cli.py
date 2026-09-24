@@ -5,14 +5,13 @@ import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
 
 import click
 from dataall_core.dataall_client import DataallClient
 from dataall_core.profile import CONFIG_PATH
 
 from dataall_cli.bind_commands import bind
-from dataall_cli.utils import discover_from_frontend, save_config
+from dataall_cli.utils import discover_from_frontend, frontend_origin, save_config
 
 DA_CONFIG_PATH = os.getenv("dataall_config_path", CONFIG_PATH)
 CREDS_PATH = os.getenv("dataall_creds_path", None)
@@ -65,21 +64,23 @@ ISSUER_PROMPT = (
 )
 SECRET_PROMPT = "Enter IdP client secret (if applicable)"
 AUTH_SERVER_PROMPT = "Enter IdP custom auth server (if applicable)"
-FRONT_PAGE_PROMPT = (
-    "Enter data.all front page URL (leave empty to type the values yourself)"
-)
+FRONT_PAGE_PROMPT = "Enter data.all front page URL (leave empty to configure manually)"
 
 
 class AuthScopedOption(click.Option):
     """Option whose prompt depends on ``--auth_type``.
 
     ``scoped`` maps an auth type to ``{"prompt": text, "default": value}``. A spec
-    without ``prompt`` uses its default silently; auth types not listed get ``None``.
-    Values discovered from ``--dataall_url`` are used without prompting.
+    without ``prompt`` uses its default silently; auth types not listed get ``None``;
+    without ``scoped`` the option prompts normally. Values discovered from
+    ``--dataall_url`` are used without prompting.
     """
 
     def __init__(
-        self, *args: Any, scoped: Dict[str, Dict[str, Any]], **kwargs: Any
+        self,
+        *args: Any,
+        scoped: Optional[Dict[str, Dict[str, Any]]] = None,
+        **kwargs: Any,
     ) -> None:
         self.scoped = scoped
         kwargs.setdefault("prompt", True)
@@ -90,6 +91,8 @@ class AuthScopedOption(click.Option):
         discovered = ctx.meta.get(DISCOVERED, {})
         if self.name in discovered:
             return discovered[self.name]
+        if self.scoped is None:
+            return super().prompt_for_value(ctx)
         spec = self.scoped.get(str(ctx.params.get("auth_type")))
         if spec is None:
             return None
@@ -112,14 +115,19 @@ def _discover(
         found = discover_from_frontend(value)
     except Exception as e:
         click.echo(f"Could not read settings from {value}: {e}", err=True)
-        found = {}
-    parsed = urlparse(value)
-    found["frontend_url"] = f"{parsed.scheme}://{parsed.netloc}"
+        found = {"frontend_url": frontend_origin(value)}
+    chosen = ctx.params.get("auth_type")
+    detected = found.get("auth_type")
+    if chosen and detected and chosen != detected:
+        click.echo(
+            f"The front page uses {detected} but --auth_type {chosen} was given; "
+            "keeping only the page URL",
+            err=True,
+        )
+        found = {"frontend_url": found["frontend_url"]}
     for key, item in found.items():
         click.echo(f"Discovered {key}: {item}", err=True)
     ctx.meta[DISCOVERED] = found
-    if "auth_type" not in ctx.params:
-        ctx.default_map = {**(ctx.default_map or {}), "auth_type": "OidcBrowserAuth"}
     return value
 
 
@@ -129,19 +137,21 @@ def _for(auth_types: List[str], **spec: Any) -> Dict[str, Dict[str, Any]]:
 
 @dataall_cli.command()
 @click.option(
+    "--dataall_url",
+    prompt=FRONT_PAGE_PROMPT,
+    default="",
+    show_default=False,
+    expose_value=False,
+    callback=_discover,
+    help="data.all front page URL; the auth type, IdP, client id and API endpoint are read from it",
+)
+@click.option(
     "--auth_type",
+    cls=AuthScopedOption,
     type=click.Choice(AUTH_TYPES),
     default="CognitoAuth",
     prompt="Select authentication type",
     help="Authentication type: Cognito, Custom (username/password) or OIDC browser login",
-)
-@click.option(
-    "--dataall_url",
-    cls=AuthScopedOption,
-    expose_value=False,
-    callback=_discover,
-    scoped={"OidcBrowserAuth": {"prompt": FRONT_PAGE_PROMPT, "default": ""}},
-    help="data.all front page URL; reads the IdP issuer, client id and API endpoint from it",
 )
 @click.option(
     "--client_id",

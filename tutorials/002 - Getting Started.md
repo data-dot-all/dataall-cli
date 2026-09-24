@@ -69,7 +69,7 @@ The quickest way to configure it is to point the CLI at the data.all front page;
 dataall_cli configure --profile okta --auth_type OidcBrowserAuth --dataall_url https://DATAALL_DOMAIN_URL
 ```
 
-Without flags, `dataall_cli configure` asks for the authentication type and then for the front page URL; leave it empty to type the issuer, client id and API endpoint yourself.
+Without flags, `dataall_cli configure` first asks for the front page URL. From the deployed app it detects whether the deployment uses Cognito or an OIDC provider and fills in the matching values, so only the profile name (and, for Cognito, the optional client secret and auth server) is asked. Leave the URL empty to choose the type and enter the values yourself.
 
 The resulting profile in `~/.dataall/config.yaml`:
 
