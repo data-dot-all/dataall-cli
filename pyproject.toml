@@ -1,6 +1,6 @@
 [project]
 name = "dataall-cli"
-version = "0.4.3"
+version = "0.5.0"
 description = "AWS data.all CLI"
 authors = [{ name = "Amazon Web Services" }]
 license = { text = "Apache License 2.0" }
