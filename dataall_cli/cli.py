@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import click
+from dataall_core.auth.oidc_browser_auth import (
+    DEFAULT_FALLBACK_REDIRECT_URI,
+    DEFAULT_REDIRECT_URI,
+    DEFAULT_SCOPES,
+)
 from dataall_core.dataall_client import DataallClient
 from dataall_core.profile import CONFIG_PATH
 
@@ -52,9 +57,6 @@ bind(
 
 
 AUTH_TYPES = ["CognitoAuth", "CustomAuth", "OidcBrowserAuth"]
-DEFAULT_REDIRECT_URI = "http://localhost:8765/callback"
-DEFAULT_FALLBACK_REDIRECT_URI = "http://localhost:8766/callback"
-DEFAULT_SCOPES = "openid offline_access"
 DISCOVERED = "dataall_discovered"
 DISCOVERED_FOR = "dataall_discovered_for"
 
