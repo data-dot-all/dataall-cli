@@ -4,13 +4,14 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import click
 from dataall_core.dataall_client import DataallClient
 from dataall_core.profile import CONFIG_PATH
 
 from dataall_cli.bind_commands import bind
-from dataall_cli.utils import save_config
+from dataall_cli.utils import discover_from_frontend, frontend_origin, save_config
 
 DA_CONFIG_PATH = os.getenv("dataall_config_path", CONFIG_PATH)
 CREDS_PATH = os.getenv("dataall_creds_path", None)
@@ -50,50 +51,180 @@ bind(
 )
 
 
+AUTH_TYPES = ["CognitoAuth", "CustomAuth", "OidcBrowserAuth"]
+DEFAULT_REDIRECT_URI = "http://localhost:8765/callback"
+DEFAULT_FALLBACK_REDIRECT_URI = "http://localhost:8766/callback"
+DEFAULT_SCOPES = "openid offline_access"
+DISCOVERED = "dataall_discovered"
+DISCOVERED_FOR = "dataall_discovered_for"
+
+DOMAIN_PROMPT = "Enter data.all's domain URL (e.g. https://<DOMAIN>.com)"
+IDP_PROMPT = "Enter data.all Identity Provider Domain (e.g. https://<IdP-DOMAIN>.com)"
+ISSUER_PROMPT = (
+    "Enter OIDC issuer URL (e.g. https://<ORG>.okta.com/oauth2/<AUTH-SERVER-ID>)"
+)
+SECRET_PROMPT = "Enter IdP client secret (if applicable)"
+AUTH_SERVER_PROMPT = "Enter IdP custom auth server (if applicable)"
+FRONT_PAGE_PROMPT = "Enter data.all front page URL (leave empty to configure manually)"
+
+
+class AuthScopedOption(click.Option):
+    """Option whose prompt depends on ``--auth_type``.
+
+    ``scoped`` maps an auth type to ``{"prompt": text, "default": value}``. A spec
+    without ``prompt`` uses its default silently; auth types not listed get ``None``;
+    without ``scoped`` the option prompts normally. Values discovered from
+    ``--dataall_url`` are used without prompting.
+    """
+
+    def __init__(
+        self,
+        *args: Any,
+        scoped: Optional[Dict[str, Dict[str, Any]]] = None,
+        **kwargs: Any,
+    ) -> None:
+        self.scoped = scoped
+        kwargs.setdefault("prompt", True)
+        super().__init__(*args, **kwargs)
+
+    def prompt_for_value(self, ctx: click.Context) -> Any:
+        """Return the value for the active auth type, prompting only when needed."""
+        discovered = ctx.meta.get(DISCOVERED, {})
+        if self.name in discovered:
+            return discovered[self.name]
+        if self.scoped is None:
+            return super().prompt_for_value(ctx)
+        spec = self.scoped.get(str(ctx.params.get("auth_type")))
+        if spec is None:
+            return None
+        if "prompt" not in spec:
+            return spec.get("default")
+        return click.prompt(
+            spec["prompt"],
+            default=spec.get("default"),
+            type=self.type,
+            value_proc=lambda x: self.process_value(ctx, x),
+        )
+
+
+def _discover(
+    ctx: click.Context, _param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if not value or ctx.meta.get(DISCOVERED_FOR) == value:
+        return value
+    ctx.meta[DISCOVERED_FOR] = value
+    try:
+        found = discover_from_frontend(value)
+    except Exception as e:
+        click.echo(f"Could not read settings from {value}: {e}", err=True)
+        found = {"frontend_url": frontend_origin(value)}
+    chosen = ctx.params.get("auth_type")
+    detected = found.get("auth_type")
+    if chosen and detected and chosen != detected:
+        click.echo(
+            f"The front page uses {detected} but --auth_type {chosen} was given; "
+            "keeping only the page URL",
+            err=True,
+        )
+        found = {"frontend_url": found["frontend_url"]}
+    for key, item in found.items():
+        click.echo(f"Discovered {key}: {item}", err=True)
+    ctx.meta[DISCOVERED] = found
+    return value
+
+
+def _for(auth_types: List[str], **spec: Any) -> Dict[str, Dict[str, Any]]:
+    return {auth_type: dict(spec) for auth_type in auth_types}
+
+
 @dataall_cli.command()
 @click.option(
+    "--dataall_url",
+    prompt=FRONT_PAGE_PROMPT,
+    default="",
+    show_default=False,
+    expose_value=False,
+    callback=_discover,
+    help="data.all front page URL; the auth type, IdP, client id and API endpoint are read from it",
+)
+@click.option(
     "--auth_type",
-    type=click.Choice(["CognitoAuth", "CustomAuth"]),
+    cls=AuthScopedOption,
+    type=click.Choice(AUTH_TYPES),
     default="CognitoAuth",
     prompt="Select authentication type",
-    help="Authentication type: Cognito or Custom",
+    help="Authentication type: Cognito, Custom (username/password) or OIDC browser login",
 )
 @click.option(
     "--client_id",
+    cls=AuthScopedOption,
     required=True,
-    prompt="Enter data.all app client id",
+    scoped=_for(AUTH_TYPES, prompt="Enter data.all app client id"),
     help="data.all app client id",
 )
 @click.option(
     "--api_endpoint_url",
+    cls=AuthScopedOption,
     required=True,
-    prompt="Enter data.all API endpoint url",
+    scoped=_for(AUTH_TYPES, prompt="Enter data.all API endpoint url"),
     help="data.all API endpoint url",
 )
 @click.option(
     "--redirect_uri",
+    cls=AuthScopedOption,
     required=True,
-    prompt="Enter data.all's domain URL (e.g. https://<DOMAIN>.com)",
-    help="data.all domain URL",
+    scoped={
+        **_for(["CognitoAuth", "CustomAuth"], prompt=DOMAIN_PROMPT),
+        "OidcBrowserAuth": {"default": DEFAULT_REDIRECT_URI},
+    },
+    help="OAuth redirect URI: the data.all domain URL, or the loopback URI registered for the CLI",
 )
 @click.option(
     "--idp_domain_url",
+    cls=AuthScopedOption,
     required=True,
-    prompt="Enter data.all Identity Provider Domain (e.g. https://<IdP-DOMAIN>.com)",
-    help="data.all IdP domain URL",
+    scoped={
+        **_for(["CognitoAuth", "CustomAuth"], prompt=IDP_PROMPT),
+        "OidcBrowserAuth": {"prompt": ISSUER_PROMPT},
+    },
+    help="Identity provider domain, or the OIDC issuer URL for browser login",
 )
 @click.option(
     "--client_secret",
+    cls=AuthScopedOption,
     required=False,
-    prompt="Enter IdP client secret (if applicable)",
-    default="",
-    help="profile name for dataall_cli configured user",
+    scoped=_for(["CognitoAuth", "CustomAuth"], prompt=SECRET_PROMPT, default=""),
+    help="IdP client secret, if the app has one",
 )
 @click.option(
     "--auth_server",
-    prompt="Enter IdP custom auth server (if applicable)",
-    default="default",
+    cls=AuthScopedOption,
+    required=False,
+    scoped=_for(
+        ["CognitoAuth", "CustomAuth"], prompt=AUTH_SERVER_PROMPT, default="default"
+    ),
     help="identity provider's custom authorization server used to get well-known openid config",
+)
+@click.option(
+    "--scopes",
+    cls=AuthScopedOption,
+    required=False,
+    scoped={"OidcBrowserAuth": {"default": DEFAULT_SCOPES}},
+    help="OIDC scopes for browser login; use 'openid' if the IdP rejects offline_access",
+)
+@click.option(
+    "--frontend_url",
+    cls=AuthScopedOption,
+    required=False,
+    scoped={
+        "OidcBrowserAuth": {"prompt": "Enter data.all front page URL", "default": ""}
+    },
+    help="data.all UI URL sent as Origin header; some deployments only accept API calls carrying it",
+)
+@click.option(
+    "--fallback_redirect_uri",
+    default=DEFAULT_FALLBACK_REDIRECT_URI,
+    help="second loopback URI tried when the first port is busy (browser login)",
 )
 @click.option(
     "--profile",
@@ -102,20 +233,23 @@ bind(
     help="profile name for dataall_cli configured user",
 )
 def configure(
+    auth_type: str,
     client_id: str,
     api_endpoint_url: str,
-    auth_type: str,
     redirect_uri: str,
     idp_domain_url: str,
-    client_secret: str,
-    auth_server: str,
+    client_secret: Optional[str],
+    auth_server: Optional[str],
+    scopes: Optional[str],
+    frontend_url: Optional[str],
+    fallback_redirect_uri: str,
     profile: str,
 ) -> None:
     """Configure data.all client for a given user, use profile to setup multiple user profiles."""
     click.echo("Configuring data.all CLI...", err=True)
 
     try:
-        profile_params_dict = {
+        profile_params_dict: Dict[str, Any] = {
             "client_id": client_id,
             "api_endpoint_url": api_endpoint_url,
             "auth_type": auth_type,
@@ -131,6 +265,12 @@ def configure(
                     "session_token_endpoint": session_token_endpoint,
                 }
             )
+        if auth_type == "OidcBrowserAuth":
+            profile_params_dict.update(
+                {"scopes": scopes, "fallback_redirect_uri": fallback_redirect_uri}
+            )
+        if frontend_url:
+            profile_params_dict["frontend_url"] = frontend_url.rstrip("/")
         if CREDS_PATH:
             profile_params_dict.update(
                 {
